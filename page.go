@@ -6,6 +6,8 @@ import (
 	"log"
 	"strings"
 
+	_ "github.com/mattn/go-sqlite3"
+
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -22,7 +24,7 @@ func setup_DB() (*sql.DB, error) {
 	CREATE TABLE IF NOT EXISTS tasks (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		done BOOLEAN NOT NULL DEFAULT 0,
-		details TEXT NOT NULL,
+		details TEXT NOT NULL
 	);
 	`
 
