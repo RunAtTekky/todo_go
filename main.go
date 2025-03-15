@@ -11,10 +11,13 @@ func main() {
 			{
 				done:    false,
 				details: "I'm a task",
+				// on_press: ,
+				on_press: func() tea.Msg { return toggle_casing_msg{} },
 			},
 			{
-				done:    false,
-				details: "I'm another task",
+				done:     false,
+				details:  "I'm another task",
+				on_press: func() tea.Msg { return toggle_casing_msg{} },
 			},
 		},
 		index: 0,

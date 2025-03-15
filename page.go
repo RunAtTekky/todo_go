@@ -38,13 +38,31 @@ Use ctrl+c to quit
 	// return "Hola"
 }
 
+type toggle_casing_msg struct{}
+
+func (m tasks) toggle_selected_item() tea.Model {
+	txt := m.entries[m.index].details
+
+	if txt == strings.ToUpper(txt) {
+		m.entries[m.index].details = strings.ToLower(txt)
+	} else {
+		m.entries[m.index].details = strings.ToUpper(txt)
+	}
+
+	return m
+}
+
 // UPDATE
 func (m tasks) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case toggle_casing_msg:
+		return m.toggle_selected_item(), nil
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c":
 			return m, tea.Quit
+		case "enter", "return":
+			return m, m.entries[m.index].on_press
 		}
 	}
 
