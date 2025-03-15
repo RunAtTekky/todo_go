@@ -246,9 +246,10 @@ func (m tasks) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "ctrl+c", "q":
 				return m, tea.Quit
 			case "enter", "return":
-				if len(m.entries) >= 0 {
+				if len(m.entries) > 0 {
 					return m, m.entries[m.index].on_press
 				}
+				return m, nil
 			case "j":
 				m.index++
 				if m.index >= len(m.entries) {
@@ -271,6 +272,10 @@ func (m tasks) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 				m.delete_task(m.entries[m.index].id)
 				m.entries = append(m.entries[:m.index], m.entries[m.index+1:]...)
+
+				if m.index >= len(m.entries) {
+					m.index = len(m.entries) - 1
+				}
 				return m, tea.ClearScreen
 			case "?":
 				m.show_help = !m.show_help
