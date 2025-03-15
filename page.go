@@ -4,8 +4,21 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
+
+func initialModel() tasks {
+	ti := textinput.New()
+	ti.Placeholder = "Enter a task..."
+	ti.Focus()
+
+	return tasks{
+		entries:    []task{},
+		text_input: ti,
+		input_mode: true,
+	}
+}
 
 // INIT
 func (m tasks) Init() tea.Cmd {
@@ -14,6 +27,14 @@ func (m tasks) Init() tea.Cmd {
 
 // VIEW
 func (m tasks) View() string {
+
+	output := ""
+
+	// Controls
+	if m.input_mode {
+		output += "Enter task: " + m.text_input.View() + "\n"
+	}
+
 	var task_option []string
 	for i, t := range m.entries {
 
@@ -23,19 +44,22 @@ func (m tasks) View() string {
 			task_option = append(task_option, fmt.Sprintf("   %t \t| %s ", t.done, t.details))
 		}
 	}
+	if len(m.entries) == 0 {
+		// output += "No tasks!\n"
+		task_option = append(task_option, "No tasks!\n")
+	}
 
-	output := fmt.Sprintf(`
+	output += fmt.Sprintf(`
 Hiiiiii, this is our TODO app
 %s
 
+Use vim bindings j/k to move around
 Use ctrl+c or q to quit
+Use c to create new task 
+Use esc to return to tasks
 `, strings.Join(task_option, "\n"))
 
 	return output
-
-	// return strings.Join(task_option, "\n")
-	// return m.entries[m.index].details
-	// return "Hola"
 }
 
 type toggle_casing_msg struct{}
@@ -43,27 +67,15 @@ type toggle_casing_msg struct{}
 func (m tasks) toggle_selected_item() tea.Model {
 	// txt := m.entries[m.index].details
 
+	if len(m.entries) == 0 {
+		return m
+	}
+
 	if m.entries[m.index].done {
 		m.entries[m.index].done = false
 	} else {
 		m.entries[m.index].done = true
 	}
-
-	// if txt == strings.ToUpper(txt) {
-	// 	m.entries[m.index].details = strings.ToLower(txt)
-	// } else {
-	// 	m.entries[m.index].details = strings.ToUpper(txt)
-	// }
-
-	return m
-}
-
-func (m tasks) create_task() tea.Model {
-	// for _, t := range m.entries {
-	// 	t.details = "lmao"
-	// }
-
-	m.entries[m.index].details = "lmao"
 
 	return m
 }
@@ -73,20 +85,57 @@ func (m tasks) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case toggle_casing_msg:
 		return m.toggle_selected_item(), nil
+
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "ctrl+c", "q":
-			return m, tea.Quit
-		case "enter", "return":
-			return m, m.entries[m.index].on_press
-		case "j":
-			m.index++
-			return m, nil
-		case "k":
-			m.index--
-			return m, nil
-		case "c":
-			return m.create_task(), nil
+		if m.input_mode {
+			m.text_input, _ = m.text_input.Update(msg)
+			switch msg.String() {
+			case "ctrl+c":
+				return m, tea.Quit
+			case "esc":
+				m.input_mode = false
+				m.text_input.Reset()
+				return m, tea.ClearScreen
+			case "enter", "return":
+				new_task := m.text_input.Value()
+				if new_task != "" {
+					m.entries = append(m.entries, task{
+						details:  new_task,
+						done:     false,
+						on_press: func() tea.Msg { return toggle_casing_msg{} },
+					})
+				}
+				m.input_mode = false
+				m.text_input.Reset()
+
+				return m, tea.ClearScreen
+
+			}
+
+		} else {
+			switch msg.String() {
+			case "ctrl+c", "q":
+				return m, tea.Quit
+			case "enter", "return":
+				return m, m.entries[m.index].on_press
+			case "j":
+				m.index++
+				if m.index >= len(m.entries) {
+					m.index = len(m.entries) - 1
+				}
+				return m, nil
+			case "k":
+				m.index--
+				if m.index < 0 {
+					m.index = 0
+				}
+				return m, nil
+			case "c":
+				m.input_mode = true
+				m.text_input.Focus()
+				return m, textinput.Blink
+			}
+
 		}
 	}
 
