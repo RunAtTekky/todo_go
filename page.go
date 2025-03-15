@@ -39,9 +39,18 @@ func (m tasks) View() string {
 	for i, t := range m.entries {
 
 		if m.index == i {
-			task_option = append(task_option, fmt.Sprintf("-> %t \t| %s ", t.done, t.details))
+
+			if t.done {
+				task_option = append(task_option, fmt.Sprintf("-> [x] %s ", t.details))
+			} else {
+				task_option = append(task_option, fmt.Sprintf("-> [ ] %s ", t.details))
+			}
 		} else {
-			task_option = append(task_option, fmt.Sprintf("   %t \t| %s ", t.done, t.details))
+			if t.done {
+				task_option = append(task_option, fmt.Sprintf("   [x] %s ", t.details))
+			} else {
+				task_option = append(task_option, fmt.Sprintf("   [ ] %s ", t.details))
+			}
 		}
 	}
 	if len(m.entries) == 0 {
@@ -56,6 +65,7 @@ Hiiiiii, this is our TODO app
 Use vim bindings j/k to move around
 Use ctrl+c or q to quit
 Use c to create new task 
+Use d to delete task
 Use esc to return to tasks
 `, strings.Join(task_option, "\n"))
 
@@ -134,6 +144,9 @@ func (m tasks) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.input_mode = true
 				m.text_input.Focus()
 				return m, textinput.Blink
+			case "d":
+				m.entries = append(m.entries[:m.index], m.entries[m.index+1:]...)
+				return m, nil
 			}
 
 		}
