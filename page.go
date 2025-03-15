@@ -18,9 +18,9 @@ func (m tasks) View() string {
 	for i, t := range m.entries {
 
 		if m.index == i {
-			task_option = append(task_option, fmt.Sprintf("-> %s", t.details))
+			task_option = append(task_option, fmt.Sprintf("-> %t \t| %s ", t.done, t.details))
 		} else {
-			task_option = append(task_option, fmt.Sprintf("   %s", t.details))
+			task_option = append(task_option, fmt.Sprintf("   %t \t| %s ", t.done, t.details))
 		}
 	}
 
@@ -28,7 +28,7 @@ func (m tasks) View() string {
 Hiiiiii, this is our TODO app
 %s
 
-Use ctrl+c to quit
+Use ctrl+c or q to quit
 `, strings.Join(task_option, "\n"))
 
 	return output
@@ -41,13 +41,19 @@ Use ctrl+c to quit
 type toggle_casing_msg struct{}
 
 func (m tasks) toggle_selected_item() tea.Model {
-	txt := m.entries[m.index].details
+	// txt := m.entries[m.index].details
 
-	if txt == strings.ToUpper(txt) {
-		m.entries[m.index].details = strings.ToLower(txt)
+	if m.entries[m.index].done {
+		m.entries[m.index].done = false
 	} else {
-		m.entries[m.index].details = strings.ToUpper(txt)
+		m.entries[m.index].done = true
 	}
+
+	// if txt == strings.ToUpper(txt) {
+	// 	m.entries[m.index].details = strings.ToLower(txt)
+	// } else {
+	// 	m.entries[m.index].details = strings.ToUpper(txt)
+	// }
 
 	return m
 }
@@ -59,10 +65,16 @@ func (m tasks) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.toggle_selected_item(), nil
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "ctrl+c":
+		case "ctrl+c", "q":
 			return m, tea.Quit
 		case "enter", "return":
 			return m, m.entries[m.index].on_press
+		case "j":
+			m.index++
+			return m, nil
+		case "k":
+			m.index--
+			return m, nil
 		}
 	}
 
