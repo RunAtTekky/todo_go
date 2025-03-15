@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"strings"
 
@@ -8,7 +9,32 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func initialModel() tasks {
+func setup_DB() (*sql.DB, error) {
+
+	db, err := sql.Open("sqlite3", "./todo.db")
+
+	if err != nil {
+		return nil, err
+	}
+
+	createTABLEsql := `
+	CREATE TABLE IF NOT EXISTS tasks (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		done BOOLEAN NOT NULL DEFAULT 0,
+		details TEXT NOT NULL,
+	);
+	`
+
+	_, err = db.Exec(createTABLEsql)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
+}
+
+func initialModel(db *sql.DB) tasks {
 	ti := textinput.New()
 	ti.Placeholder = "Enter a task..."
 	ti.Focus()

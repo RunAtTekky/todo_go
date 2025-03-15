@@ -1,29 +1,22 @@
 package main
 
 import (
+	"log"
+
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 func main() {
 
-	// m := tasks{
-	// 	entries: []task{
-	// 		{
-	// 			done:    false,
-	// 			details: "I'm a task",
-	// 			// on_press: ,
-	// 			on_press: func() tea.Msg { return toggle_casing_msg{} },
-	// 		},
-	// 		{
-	// 			done:     false,
-	// 			details:  "I'm another task",
-	// 			on_press: func() tea.Msg { return toggle_casing_msg{} },
-	// 		},
-	// 	},
-	// 	index: 0,
-	// }
+	db, err := setup_DB()
 
-	p := tea.NewProgram(initialModel())
+	if err != nil {
+		log.Fatalf("Failed to setup database %v", err)
+	}
+
+	defer db.Close()
+
+	p := tea.NewProgram(initialModel(db))
 
 	if _, err := p.Run(); err != nil {
 		panic(err)
