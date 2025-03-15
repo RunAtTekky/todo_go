@@ -204,11 +204,9 @@ func (m tasks) toggle_selected_item() tea.Model {
 		return m
 	}
 
-	if m.entries[m.index].done {
-		m.entries[m.index].done = false
-	} else {
-		m.entries[m.index].done = true
-	}
+	m.entries[m.index].done = !m.entries[m.index].done
+
+	m.update_task(m.entries[m.index].id, m.entries[m.index].done)
 
 	return m
 }
@@ -232,11 +230,7 @@ func (m tasks) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "enter", "return":
 				new_task := m.text_input.Value()
 				if new_task != "" {
-					m.entries = append(m.entries, task{
-						details:  new_task,
-						done:     false,
-						on_press: func() tea.Msg { return toggle_casing_msg{} },
-					})
+					m.add_task(new_task)
 				}
 				m.input_mode = false
 				m.text_input.Reset()
@@ -250,7 +244,9 @@ func (m tasks) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "ctrl+c", "q":
 				return m, tea.Quit
 			case "enter", "return":
-				return m, m.entries[m.index].on_press
+				if len(m.entries) >= 0 {
+					return m, m.entries[m.index].on_press
+				}
 			case "j":
 				m.index++
 				if m.index >= len(m.entries) {
@@ -271,6 +267,7 @@ func (m tasks) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if len(m.entries) == 0 {
 					return m, nil
 				}
+				m.delete_task(m.entries[m.index].id)
 				m.entries = append(m.entries[:m.index], m.entries[m.index+1:]...)
 				return m, tea.ClearScreen
 			case "?":
