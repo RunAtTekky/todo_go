@@ -10,3 +10,14 @@ As of now it is only a simple TUI application with `Sqlite3` integration
 
 TODO:
 - [ ] Beautify with [lipgloss](https://github.com/charmbracelet/lipgloss)
+
+## How to setup
+Use the following step by step
+
+```bash
+git clone git@github.com:RunAtTekky/todo_go.git
+
+cd todo_go
+
+go run .
+```
