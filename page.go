@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -39,11 +40,48 @@ func initialModel(db *sql.DB) tasks {
 	ti.Placeholder = "Enter a task..."
 	ti.Focus()
 
-	return tasks{
+	model := tasks{
 		entries:    []task{},
 		text_input: ti,
-		input_mode: true,
+		input_mode: false,
+		db:         db,
 	}
+
+	model.load_DB()
+
+	return model
+}
+
+func (m *tasks) load_DB() {
+
+	rows, err := m.db.Query("SELECT id, done, details FROM tasks")
+
+	if err != nil {
+		log.Printf("Error loading tasks %v", err)
+		return
+	}
+
+	defer rows.Close()
+
+	var loaded_tasks []task
+
+	for rows.Next() {
+		var t task
+
+		err := rows.Scan(&t.id, &t.done, &t.details)
+
+		if err != nil {
+			log.Printf("Error loading this row %v", err)
+			continue
+		}
+
+		t.on_press = func() tea.Msg { return toggle_casing_msg{} }
+
+		loaded_tasks = append(loaded_tasks, t)
+	}
+
+	m.entries = loaded_tasks
+
 }
 
 // INIT
