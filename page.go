@@ -58,6 +58,16 @@ func (m tasks) toggle_selected_item() tea.Model {
 	return m
 }
 
+func (m tasks) create_task() tea.Model {
+	// for _, t := range m.entries {
+	// 	t.details = "lmao"
+	// }
+
+	m.entries[m.index].details = "lmao"
+
+	return m
+}
+
 // UPDATE
 func (m tasks) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
@@ -75,6 +85,8 @@ func (m tasks) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "k":
 			m.index--
 			return m, nil
+		case "c":
+			return m.create_task(), nil
 		}
 	}
 
