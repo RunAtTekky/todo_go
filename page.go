@@ -84,6 +84,51 @@ func (m *tasks) load_DB() {
 
 }
 
+// ADD task
+func (m *tasks) add_task(details string) {
+
+	result, err := m.db.Exec("INSERT INTO tasks (done, details) VALUES (?, ?)", false, details)
+
+	if err != nil {
+		log.Printf("Error inserting task: %v", err)
+		return
+	}
+
+	id, err := result.LastInsertId()
+
+	if err != nil {
+		log.Printf("Error getting last id: %v", err)
+		return
+	}
+
+	m.entries = append(m.entries, task{
+		id:       int(id),
+		done:     false,
+		details:  details,
+		on_press: func() tea.Msg { return toggle_casing_msg{} },
+	})
+}
+
+// UPDATE task
+func (m *tasks) update_task(id int, done bool) {
+
+	_, err := m.db.Exec("UPDATE tasks SET done = ? WHERE id = ?", done, id)
+
+	if err != nil {
+		log.Printf("Error updating task: %v", err)
+	}
+
+}
+
+// DELETE task
+func (m *tasks) delete_task(id int) {
+	_, err := m.db.Exec("DELETE FROM tasks WHERE ID = ?", id)
+
+	if err != nil {
+		log.Printf("Error deleting task: %v", err)
+	}
+}
+
 // INIT
 func (m tasks) Init() tea.Cmd {
 	return nil
