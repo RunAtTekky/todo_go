@@ -58,16 +58,30 @@ func (m tasks) View() string {
 		task_option = append(task_option, "No tasks!\n")
 	}
 
+	help_options := ""
+
+	if m.show_help {
+
+		help_options += `
+Use vim bindings k/j to move up/down
+Use ctrl+c or q to quit
+Use c to create new task 
+	Use esc to return to tasks
+Use d to delete task
+	`
+	} else {
+		help_options += `
+Use ? to show help
+		`
+	}
+
 	output += fmt.Sprintf(`
 Hiiiiii, this is our TODO app
 %s
 
-Use vim bindings j/k to move around
-Use ctrl+c or q to quit
-Use c to create new task 
-Use d to delete task
-Use esc to return to tasks
-`, strings.Join(task_option, "\n"))
+%s
+
+`, strings.Join(task_option, "\n"), help_options)
 
 	return output
 }
@@ -145,8 +159,14 @@ func (m tasks) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.text_input.Focus()
 				return m, textinput.Blink
 			case "d":
+				if len(m.entries) == 0 {
+					return m, nil
+				}
 				m.entries = append(m.entries[:m.index], m.entries[m.index+1:]...)
-				return m, nil
+				return m, tea.ClearScreen
+			case "?":
+				m.show_help = !m.show_help
+				return m, tea.ClearScreen
 			}
 
 		}

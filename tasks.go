@@ -11,6 +11,7 @@ type tasks struct {
 
 	text_input textinput.Model
 	input_mode bool
+	show_help  bool
 }
 
 type task struct {
