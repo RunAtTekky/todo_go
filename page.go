@@ -109,6 +109,10 @@ func (m *tasks) add_task(details string) {
 		details:  details,
 		on_press: func() tea.Msg { return toggle_casing_msg{} },
 	})
+
+	if m.index < 0 {
+		m.index = 0
+	}
 }
 
 // UPDATE task
