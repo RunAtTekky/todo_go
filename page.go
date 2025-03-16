@@ -8,6 +8,8 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 
+	"slices"
+
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -275,7 +277,7 @@ func (m tasks) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return m, nil
 				}
 				m.delete_task(m.entries[m.index].id)
-				m.entries = append(m.entries[:m.index], m.entries[m.index+1:]...)
+				m.entries = slices.Delete(m.entries, m.index, m.index+1)
 
 				if m.index >= len(m.entries) {
 					m.index = len(m.entries) - 1
@@ -284,6 +286,12 @@ func (m tasks) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "?":
 				m.show_help = !m.show_help
 				return m, tea.ClearScreen
+			case "g":
+				m.index = 0
+				return m, nil
+			case "G":
+				m.index = len(m.entries) - 1
+				return m, nil
 			}
 
 		}
