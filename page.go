@@ -137,7 +137,7 @@ func (m *tasks) delete_task(id int) {
 
 // INIT
 func (m tasks) Init() tea.Cmd {
-	return nil
+	return tea.ClearScreen
 }
 
 // VIEW
